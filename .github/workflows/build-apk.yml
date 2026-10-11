@@ -12,8 +12,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -25,20 +26,24 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Extract project
+      - name: Install Android SDK packages
         run: |
-          unzip WhatsAppStatusSaver-Cloud-Build.zip
+          sdkmanager --sdk_root="$ANDROID_HOME" \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Extract project ZIP
+        run: |
+          unzip -o WhatsAppStatusSaver-Cloud-Build.zip
           cp -a WhatsAppStatusSaver/. .
 
-      - name: Build APK
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Run Gradle build
+      - name: Build debug APK
         run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
